@@ -1,0 +1,5 @@
+{
+  "name": "E-Biz Hub",
+  "description": "A comprehensive system to aggregate and track open tenders from multiple RSS feed sources. It includes a dashboard, watchlist for interested tenders, and settings to manage sources.",
+  "requestFramePermissions": []
+}
