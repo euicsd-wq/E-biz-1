@@ -69,12 +69,12 @@ const Analytics: React.FC<AnalyticsProps> = ({ store, currentUser }) => {
         
         const winRate = (totalWon + totalLost) > 0 ? (totalWon / (totalWon + totalLost)) * 100 : 0;
         
-        const statusCounts = filteredWatchlist.reduce((acc, item) => {
+        const statusCounts = filteredWatchlist.reduce((acc: Record<TenderStatus, number>, item) => {
             acc[item.status] = (acc[item.status] || 0) + 1;
             return acc;
         }, {} as Record<TenderStatus, number>);
 
-        const sourceStats = filteredWatchlist.reduce((acc, item) => {
+        const sourceStats = filteredWatchlist.reduce((acc: Record<string, { total: number, won: number, lost: number }>, item) => {
             const source = item.tender.source;
             if (!acc[source]) {
                 acc[source] = { total: 0, won: 0, lost: 0 };

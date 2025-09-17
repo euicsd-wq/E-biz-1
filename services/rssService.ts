@@ -143,10 +143,12 @@ const parseXmlFeed = (xml: Document, feedUrl: string): Tender[] => {
 
 export const fetchAndParseRss = async (feedUrl: string): Promise<Tender[]> => {
   try {
-    // Add a cache-busting parameter to the URL to ensure fresh data is fetched on every refresh.
-    const urlWithCacheBuster = `${feedUrl}${feedUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
-    const response = await fetch(`${CORS_PROXY_URL}${encodeURIComponent(urlWithCacheBuster)}`);
+    // REMOVED: Cache-busting parameter to reduce requests and avoid rate-limiting.
+    const response = await fetch(`${CORS_PROXY_URL}${encodeURIComponent(feedUrl)}`);
     if (!response.ok) {
+      if (response.status === 429) {
+          throw new Error(`Rate limit exceeded for feed: ${feedUrl}. Please wait before refreshing.`);
+      }
       throw new Error(`HTTP error! status: ${response.status} for URL: ${feedUrl}`);
     }
     const text = await response.text();
@@ -177,6 +179,7 @@ export const fetchAndParseRss = async (feedUrl: string): Promise<Tender[]> => {
 
   } catch (error) {
     console.error(`Failed to fetch or parse RSS feed: ${feedUrl}`, error);
-    return [];
+    // Re-throw the error so the calling function can handle it.
+    throw error;
   }
 };

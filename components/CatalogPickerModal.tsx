@@ -30,7 +30,7 @@ const CatalogPickerModal: React.FC<CatalogPickerModalProps> = ({ isOpen, onClose
     if (!searchQuery.trim()) return catalog;
     const lowercasedQuery = searchQuery.toLowerCase();
     return catalog.filter(item => 
-        item.itemName.toLowerCase().includes(lowercasedQuery) ||
+        item.item_name.toLowerCase().includes(lowercasedQuery) ||
         item.category.toLowerCase().includes(lowercasedQuery) ||
         item.description.toLowerCase().includes(lowercasedQuery)
     );
@@ -51,18 +51,18 @@ const CatalogPickerModal: React.FC<CatalogPickerModalProps> = ({ isOpen, onClose
   const handleAddSelected = () => {
     const itemsToAdd = catalog.filter(item => selectedItems.has(item.id));
     const newQuoteItems = itemsToAdd.map(ci => ({
-        itemName: ci.itemName,
+        itemName: ci.item_name,
         description: ci.description,
         manufacturer: ci.manufacturer,
         model: ci.model,
         quantity: 1,
-        unitPrice: ci.salePrice,
+        unitPrice: ci.sale_price,
         cost: ci.cost,
         uom: ci.uom,
-        technicalDetails: { ...ci.technicalSpecs },
+        technicalDetails: { ...ci.technical_specs },
         catalogItemRef: ci.id,
-        itemType: ci.itemType,
-        hsnCode: ci.hsnCode,
+        itemType: ci.item_type,
+        hsnCode: ci.hsn_code,
     }));
 
     onAddItems(newQuoteItems);
@@ -127,10 +127,10 @@ const CatalogPickerModal: React.FC<CatalogPickerModalProps> = ({ isOpen, onClose
                                             className="w-4 h-4 rounded bg-slate-600 border-slate-500 text-blue-500 focus:ring-blue-600 cursor-pointer disabled:cursor-not-allowed"
                                         />
                                     </td>
-                                    <td className="p-3 font-medium text-slate-100">{item.itemName}</td>
+                                    <td className="p-3 font-medium text-slate-100">{item.item_name}</td>
                                     <td className="p-3 text-slate-400">{item.category}</td>
-                                    <td className="p-3 text-slate-400">${item.salePrice.toFixed(2)}</td>
-                                    <td className="p-3 text-slate-400">{item.vendorId ? vendorMap[item.vendorId] || 'N/A' : 'N/A'}</td>
+                                    <td className="p-3 text-slate-400">${item.sale_price.toFixed(2)}</td>
+                                    <td className="p-3 text-slate-400">{item.vendor_id ? vendorMap[item.vendor_id] || 'N/A' : 'N/A'}</td>
                                 </tr>
                             );
                         })}

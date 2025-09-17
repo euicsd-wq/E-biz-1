@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { HomeIcon, SettingsIcon, BriefcaseIcon, BanknotesIcon, UsersGroupIcon, ChartBarIcon, EnvelopeIcon } from './icons';
 import type { View, TeamMember } from '../types';
 import { TeamMemberRole } from '../types';
+import { useAuth } from '../contexts/Auth';
 
 interface SidebarProps {
   currentView: View;
@@ -10,25 +11,31 @@ interface SidebarProps {
 }
 
 const ALL_NAV_ITEMS = [
-    { id: 'home', label: 'Home', icon: HomeIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER, TeamMemberRole.MEMBER] },
-    { id: 'operations-hub', label: 'Operations Hub', icon: BriefcaseIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER, TeamMemberRole.MEMBER] },
-    { id: 'crm-hub', label: 'CRM Hub', icon: UsersGroupIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER, TeamMemberRole.MEMBER] },
-    { id: 'finance-hub', label: 'Finance Hub', icon: BanknotesIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER] },
-    { id: 'reporting-hub', label: 'Reporting Hub', icon: ChartBarIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER] },
-    { id: 'mail', label: 'Mail', icon: EnvelopeIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER, TeamMemberRole.MEMBER] },
-    { id: 'settings', label: 'Settings', icon: SettingsIcon, roles: [TeamMemberRole.ADMIN] },
+    { id: 'home', label: 'Home', icon: HomeIcon },
+    { id: 'operations-hub', label: 'Operations Hub', icon: BriefcaseIcon },
+    { id: 'crm-hub', label: 'CRM Hub', icon: UsersGroupIcon },
+    { id: 'finance-hub', label: 'Finance Hub', icon: BanknotesIcon },
+    { id: 'reporting-hub', label: 'Reporting Hub', icon: ChartBarIcon },
+    { id: 'mail', label: 'Mail', icon: EnvelopeIcon },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentUser }) => {
-  
+  const { signOut } = useAuth();
+
   const navItems = useMemo(() => {
-    return ALL_NAV_ITEMS.filter(item => item.roles.includes(currentUser.role));
+    // Admins see everything, regardless of their permissions array
+    if (currentUser.role === TeamMemberRole.ADMIN) {
+        return ALL_NAV_ITEMS;
+    }
+    // Other users see only what's in their permissions list
+    return ALL_NAV_ITEMS.filter(item => currentUser.permissions?.includes(item.id as View));
   }, [currentUser]);
 
   return (
     <aside className="w-64 bg-slate-900/70 backdrop-blur-sm text-slate-300 flex-none flex flex-col p-4 border-r border-slate-700/50">
       <div className="text-2xl font-bold text-white mb-10 p-2">Tenders Hub</div>
-      <nav>
+      <nav className="flex-grow">
         <ul>
           {navItems.map((item) => (
             <li key={item.id}>
@@ -48,9 +55,12 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentUser }) 
           ))}
         </ul>
       </nav>
-       <div className="mt-auto p-2 text-center text-xs text-slate-500">
-            <p>Logged in as:</p>
-            <p className="font-bold text-slate-300">{currentUser.name} ({currentUser.role})</p>
+       <div className="mt-auto p-2 text-center text-xs text-slate-500 border-t border-slate-700/50">
+            <p className="mt-2">Logged in as:</p>
+            <p className="font-bold text-slate-300 truncate">{currentUser.name}</p>
+            <button onClick={signOut} className="w-full mt-2 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-md text-slate-200 transition-colors">
+              Sign Out
+            </button>
        </div>
     </aside>
   );

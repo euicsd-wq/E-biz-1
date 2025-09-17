@@ -175,6 +175,7 @@ export enum ActivityType {
 
 export interface ActivityLog {
   id: string;
+  watchlistId: string;
   timestamp: string;
   type: ActivityType;
   description: string;
@@ -225,7 +226,7 @@ export interface RiskAssessment {
 
 export interface Comment {
     id: string;
-    tenderId: string;
+    watchlistId: string;
     authorId: string;
     text: string;
     createdAt: string;
@@ -238,6 +239,7 @@ export interface AIInsights {
 }
 
 export interface WatchlistItem {
+  id: string;
   tender: Tender;
   status: TenderStatus;
   addedAt: string;
@@ -256,12 +258,13 @@ export interface WatchlistItem {
   clientDocuments?: ManagedDocument[]; // @deprecated - use documents instead
   documents?: ManagedDocument[];
   technicalOfferSOP?: string[];
-  activityLog?: ActivityLog[];
   purchaseOrders?: PurchaseOrder[];
   riskAssessment?: RiskAssessment;
   aiSummary?: string;
-  comments?: Comment[];
   aiInsights?: AIInsights;
+  // FIX: Add missing activityLog and comments properties
+  activityLog?: ActivityLog[];
+  comments?: Comment[];
 }
 
 export interface CatalogItemDocument {
@@ -329,11 +332,14 @@ export enum TeamMemberRole {
     MEMBER = 'Member',
 }
 
+export type View = 'home' | 'operations-hub' | 'crm-hub' | 'finance-hub' | 'reporting-hub' | 'settings' | 'notifications' | 'mail';
+
 export interface TeamMember {
     id: string;
     name: string;
     email: string;
     role: TeamMemberRole;
+    permissions: View[];
 }
 
 export enum InteractionType {
@@ -392,20 +398,20 @@ export interface Client {
 
 export interface CatalogItem {
   id: string;
-  itemType: 'Goods' | 'Services';
+  item_type: 'Goods' | 'Services';
   category: string;
-  itemName: string;
+  item_name: string;
   description: string;
   manufacturer?: string;
   model?: string;
-  salePrice: number;
+  sale_price: number;
   cost: number;
   uom?: string;
-  vendorId: string | null;
-  assignedPersonId: string | null;
-  technicalSpecs: TechnicalDetails;
+  vendor_id: string | null;
+  assigned_person_id: string | null;
+  technical_specs: TechnicalDetails;
   documents: CatalogItemDocument[];
-  hsnCode?: string;
+  hsn_code?: string;
 }
 
 // Type for AI response before processing into CatalogItem
@@ -589,14 +595,12 @@ export enum DocumentType {
     TECHNICAL_OFFER = 'Technical Offer',
 }
 
-// FIX: Add DocumentTemplateStyle enum for document appearance settings.
 export enum DocumentTemplateStyle {
     CLASSIC = 'Classic',
     MODERN = 'Modern',
     MINIMALIST = 'Minimalist',
 }
 
-// FIX: Expanded DocumentSettings to include all required fields for customization.
 export interface DocumentSettings {
   accentColor: string;
   fontFamily: 'Inter' | 'Roboto' | 'Times New Roman' | 'Courier New';
@@ -659,8 +663,6 @@ export interface BackupData {
   documentSettings?: DocumentSettings;
   mailSettings?: MailSettings;
 }
-
-export type View = 'home' | 'operations-hub' | 'crm-hub' | 'finance-hub' | 'reporting-hub' | 'settings' | 'notifications' | 'mail';
 
 export type GlobalSearchResult = {
   type: 'tender' | 'client' | 'catalog';

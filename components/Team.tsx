@@ -27,6 +27,10 @@ const Team: React.FC<TeamProps> = ({ store, currentUser }) => {
     };
 
     const handleDelete = (memberId: string) => {
+        if (memberId === currentUser.id) {
+            store.addToast("You cannot delete your own account.", 'error');
+            return;
+        }
         if (window.confirm('Are you sure? This will unassign the member from all tenders and tasks.')) {
             removeTeamMember(memberId);
         }
@@ -37,12 +41,12 @@ const Team: React.FC<TeamProps> = ({ store, currentUser }) => {
             <div className="bg-slate-800/80 p-6 rounded-lg border border-slate-700">
                 <div className="flex justify-between items-start mb-4">
                     <div>
-                        <h2 className="text-xl font-semibold text-white">Team Management</h2>
-                        <p className="text-sm text-slate-400 mt-1">Add, edit, or remove team members and manage their roles.</p>
+                        <h2 className="text-xl font-semibold text-white">Team & Permissions</h2>
+                        <p className="text-sm text-slate-400 mt-1">Add, edit, or remove team members and manage their roles and permissions.</p>
                     </div>
                     <button 
                         onClick={() => { setEditingMember(null); setIsTeamModalOpen(true); }}
-                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        className="btn-primary">
                         <PlusIcon className="w-5 h-5 mr-2"/> Add Member
                     </button>
                 </div>
@@ -72,8 +76,8 @@ const Team: React.FC<TeamProps> = ({ store, currentUser }) => {
                                         <td className="p-3 text-slate-400">{member.role}</td>
                                         <td className="p-3 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button onClick={() => handleEdit(member)} className="p-2 rounded-full hover:bg-blue-500/20 text-slate-400 hover:text-blue-400"><EditIcon className="w-5 h-5" /></button>
-                                                <button onClick={() => handleDelete(member.id)} className="p-2 rounded-full hover:bg-red-500/20 text-slate-400 hover:text-red-400"><TrashIcon className="w-5 h-5" /></button>
+                                                <button onClick={() => handleEdit(member)} className="btn-icon"><EditIcon className="w-5 h-5" /></button>
+                                                <button onClick={() => handleDelete(member.id)} disabled={member.id === currentUser.id} className="btn-icon-danger disabled:opacity-50 disabled:cursor-not-allowed"><TrashIcon className="w-5 h-5" /></button>
                                             </div>
                                         </td>
                                     </tr>

@@ -28,7 +28,7 @@ const LogisticsSection: React.FC<LogisticsSectionProps> = ({ tender, store }) =>
         try {
             const docToSave = await generatePdf(DocumentType.DELIVERY_NOTE, tender, companyProfile, clients, documentSettings);
             if (docToSave) {
-                 addDocument(tender.tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
+                 addDocument(tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
                  store.addToast(`${docToSave.name} generated and saved to Documents.`, 'success');
             }
         } catch (error) {
@@ -79,7 +79,7 @@ const LogisticsSection: React.FC<LogisticsSectionProps> = ({ tender, store }) =>
                 <p className="text-center text-slate-400 py-8">No shipments logged for this tender yet.</p>
             )}
 
-            <ShipmentModal isOpen={isShipmentModalOpen} onClose={() => setIsShipmentModalOpen(false)} store={store} shipmentToEdit={editingShipment} preselectedTenderId={tender.tender.id} />
+            <ShipmentModal isOpen={isShipmentModalOpen} onClose={() => setIsShipmentModalOpen(false)} store={store} shipmentToEdit={editingShipment} preselectedTenderId={tender.id} />
         </div>
     );
 };

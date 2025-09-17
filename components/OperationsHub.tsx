@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { useTenderStore } from '../hooks/useTenderStore';
 import type { TeamMember, WatchlistItem } from '../types';
+import { TeamMemberRole } from '../types';
 import MyWorkspace from './MyWorkspace';
 import TendersHub from './TendersHub';
 import Procurement from './Procurement';
@@ -17,22 +18,26 @@ type OperationsHubProps = {
 
 type OperationsTab = 'tender-discovery' | 'tender-pipeline' | 'my-workspace' | 'procurement' | 'catalog' | 'logistics';
 
-const TABS = [
-    { id: 'tender-discovery', label: 'Tender Discovery', icon: SearchIcon },
-    { id: 'tender-pipeline', label: 'Tender Pipeline', icon: ClipboardListIcon },
-    { id: 'my-workspace', label: 'My Workspace', icon: UserCircleIcon },
-    { id: 'procurement', label: 'Procurement', icon: ShoppingBagIcon },
-    { id: 'catalog', label: 'Catalog', icon: CubeIcon },
-    { id: 'logistics', label: 'Logistics', icon: TruckIcon },
+const ALL_TABS = [
+    { id: 'tender-discovery', label: 'Tender Discovery', icon: SearchIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER] },
+    { id: 'tender-pipeline', label: 'Tender Pipeline', icon: ClipboardListIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER] },
+    { id: 'my-workspace', label: 'My Workspace', icon: UserCircleIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER, TeamMemberRole.MEMBER] },
+    { id: 'procurement', label: 'Procurement', icon: ShoppingBagIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER] },
+    { id: 'catalog', label: 'Catalog', icon: CubeIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER, TeamMemberRole.MEMBER] },
+    { id: 'logistics', label: 'Logistics', icon: TruckIcon, roles: [TeamMemberRole.ADMIN, TeamMemberRole.MANAGER] },
 ];
 
 const OperationsHub: React.FC<OperationsHubProps> = ({ store, currentUser, onSelectTender }) => {
-    const [activeTab, setActiveTab] = useState<OperationsTab>('tender-discovery');
+    const visibleTabs = useMemo(() => {
+        return ALL_TABS.filter(tab => tab.roles.includes(currentUser.role));
+    }, [currentUser.role]);
+
+    const [activeTab, setActiveTab] = useState<OperationsTab>(visibleTabs[0]?.id as OperationsTab || 'my-workspace');
     
     const renderContent = () => {
         switch (activeTab) {
             case 'tender-discovery':
-                return <TenderDiscovery store={store} />;
+                return <TenderDiscovery store={store} currentUser={currentUser} />;
             case 'tender-pipeline':
                 return <TendersHub store={store} currentUser={currentUser} onSelectTender={onSelectTender} />;
             case 'my-workspace':
@@ -52,7 +57,7 @@ const OperationsHub: React.FC<OperationsHubProps> = ({ store, currentUser, onSel
         <div className="h-full flex flex-col">
             <div className="border-b border-slate-700/50 mb-6">
                 <nav className="flex space-x-2 -mb-px overflow-x-auto" aria-label="Tabs">
-                    {TABS.map(tab => (
+                    {visibleTabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as OperationsTab)}

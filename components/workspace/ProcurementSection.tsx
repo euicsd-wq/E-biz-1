@@ -28,7 +28,7 @@ const ProcurementSection: React.FC<ProcurementSectionProps> = ({ tender, store }
         try {
             const docToSave = await generatePdf(DocumentType.PURCHASE_ORDER, tender, companyProfile, clients, documentSettings, po, vendors);
             if (docToSave) {
-                 addDocument(tender.tender.id, docToSave, DocumentCategory.PURCHASE_ORDER, 'System', true);
+                 addDocument(tender.id, docToSave, DocumentCategory.PURCHASE_ORDER, 'System', true);
                  store.addToast(`${docToSave.name} generated and saved to Documents.`, 'success');
             }
         } catch (error) {
@@ -65,7 +65,7 @@ const ProcurementSection: React.FC<ProcurementSectionProps> = ({ tender, store }
                                     <div className="flex items-center gap-1">
                                         <button onClick={() => handlePrintPO(po)} className="btn-icon" title="Print PO"><DocumentDownloadIcon className="w-5 h-5" /></button>
                                         <button onClick={() => { setEditingPo(po); setIsPoModalOpen(true); }} className="btn-icon" title="Edit PO"><EditIcon className="w-5 h-5" /></button>
-                                        <button onClick={() => removePurchaseOrder(tender.tender.id, po.id)} className="btn-icon-danger" title="Delete PO"><TrashIcon className="w-5 h-5" /></button>
+                                        <button onClick={() => removePurchaseOrder(tender.id, po.id)} className="btn-icon-danger" title="Delete PO"><TrashIcon className="w-5 h-5" /></button>
                                     </div>
                                 </div>
                             </div>

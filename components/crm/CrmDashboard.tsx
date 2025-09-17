@@ -38,7 +38,7 @@ const CrmDashboard: React.FC<CrmDashboardProps> = ({ store, onSelectClient, curr
         const totalWonValue = wonTenders.reduce((acc, t) => acc + calculateTenderValue(t), 0);
         const averageDealSize = wonTenders.length > 0 ? totalWonValue / wonTenders.length : 0;
         
-        const valueByClient = wonTenders.reduce((acc, t) => {
+        const valueByClient = wonTenders.reduce((acc: Record<string, number>, t) => {
             if(t.financialDetails?.clientId) {
                 acc[t.financialDetails.clientId] = (acc[t.financialDetails.clientId] || 0) + calculateTenderValue(t);
             }

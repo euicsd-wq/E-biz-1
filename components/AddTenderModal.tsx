@@ -10,7 +10,7 @@ type AddTenderModalProps = {
   store: ReturnType<typeof useTenderStore>;
 };
 
-const AddTenderModal: React.FC<AddTenderModalProps> = ({ isOpen, onClose, store }) => {
+export const AddTenderModal: React.FC<AddTenderModalProps> = ({ isOpen, onClose, store }) => {
   const [activeTab, setActiveTab] = useState<'link' | 'upload' | 'manual'>('link');
   const [tenderData, setTenderData] = useState<Partial<Tender>>({ title: '', summary: '', closingDate: '', link: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -147,46 +147,29 @@ const AddTenderModal: React.FC<AddTenderModalProps> = ({ isOpen, onClose, store 
                 <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isLoading} className="btn-secondary w-full">
                   {isLoading ? 'Processing...' : <><UploadIcon className="w-5 h-5 mr-2"/> Select Document</>}
                 </button>
-                {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+                 {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
               </div>
             )}
             {activeTab === 'manual' && (
-               <div className="space-y-4 animate-fade-in">
-                {tenderData.title && <p className="text-sm text-green-400 bg-green-500/10 p-2 rounded-md">AI has populated the fields below. Please review and edit as needed before adding.</p>}
-                <div>
-                  <label htmlFor="title" className="label-style">Tender Title</label>
-                  <input type="text" id="title" value={tenderData.title} onChange={e => handleDataChange('title', e.target.value)} required className="input-style" />
-                </div>
-                <div>
-                  <label htmlFor="summary" className="label-style">Summary</label>
-                  <textarea id="summary" value={tenderData.summary} onChange={e => handleDataChange('summary', e.target.value)} className="input-style min-h-[100px]" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                    <label htmlFor="closingDate" className="label-style">Closing Date</label>
-                    <input type="date" id="closingDate" value={tenderData.closingDate?.split('T')[0]} onChange={e => handleDataChange('closingDate', e.target.value)} required className="input-style" />
-                    </div>
-                    <div>
-                    <label htmlFor="link" className="label-style">Link (Optional)</label>
-                    <input type="url" id="link" value={tenderData.link} onChange={e => handleDataChange('link', e.target.value)} className="input-style" />
-                    </div>
-                </div>
+              <div className="space-y-4 animate-fade-in">
+                <p className="text-sm text-slate-400">Enter the tender details manually. You can still use AI to pre-fill this form.</p>
+                <div><label htmlFor="title" className="label-style">Tender Title</label><input type="text" id="title" value={tenderData.title || ''} onChange={e => handleDataChange('title', e.target.value)} required className="input-style"/></div>
+                <div><label htmlFor="summary" className="label-style">Summary</label><textarea id="summary" value={tenderData.summary || ''} onChange={e => handleDataChange('summary', e.target.value)} className="input-style min-h-[100px]"/></div>
+                <div><label htmlFor="closingDate" className="label-style">Closing Date</label><input type="date" id="closingDate" value={tenderData.closingDate || ''} onChange={e => handleDataChange('closingDate', e.target.value)} required className="input-style"/></div>
+                <div><label htmlFor="link" className="label-style">Link</label><input type="url" id="link" value={tenderData.link || ''} onChange={e => handleDataChange('link', e.target.value)} className="input-style"/></div>
               </div>
             )}
           </div>
-          <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-slate-700/50 flex-shrink-0">
-            <button type="button" onClick={onClose} className="btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary" disabled={!tenderData.title || !tenderData.closingDate}>
-              <PlusIcon className="w-5 h-5 mr-2" />
-              Add Tender
-            </button>
-          </div>
+          {activeTab === 'manual' && (
+            <div className="pt-4 mt-4 border-t border-slate-700 flex-shrink-0 flex justify-end">
+                <button type="submit" className="btn-primary">
+                    <PlusIcon className="w-5 h-5 mr-2"/>
+                    Add Tender to Watchlist
+                </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
   );
 };
-
-export default AddTenderModal;

@@ -74,20 +74,20 @@ const VendorQuoteImportModal: React.FC<VendorQuoteImportModalProps> = ({ isOpen,
             }, {} as TechnicalDetails);
 
             const newCatalogItem: Omit<CatalogItem, 'id'> = {
-                itemName: item.itemName,
+                item_name: item.itemName,
                 description: item.description,
                 cost: item.cost,
-                salePrice: item.cost, // Default sale price to cost
-                itemType: 'Goods', // Default
+                sale_price: item.cost, // Default sale price to cost
+                item_type: 'Goods', // Default
                 category: 'Uncategorized',
                 uom: item.uom,
                 manufacturer: item.manufacturer,
                 model: item.model,
-                vendorId: null,
-                assignedPersonId: null,
-                technicalSpecs,
+                vendor_id: null,
+                assigned_person_id: null,
+                technical_specs: technicalSpecs,
                 documents: [],
-                hsnCode: item.hsnCode,
+                hsn_code: item.hsnCode,
             };
             store.addCatalogItem(newCatalogItem);
         });

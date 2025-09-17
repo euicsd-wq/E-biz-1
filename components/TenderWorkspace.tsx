@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { useTenderStore } from '../hooks/useTenderStore';
 import type { WatchlistItem, TeamMember } from '../types';
 import { DocumentType, DocumentCategory } from '../types';
@@ -18,7 +18,7 @@ import LogisticsSection from './workspace/LogisticsSection';
 import InvoicingSection from './workspace/InvoicingSection';
 import ActivitySection from './workspace/ActivitySection';
 import CollaborationSection from './workspace/CollaborationSection';
-import { getStatusColors, calculateRemainingDays, getRemainingDaysInfo } from '../utils';
+import { getStatusColors, calculateRemainingDays, getRemainingDaysInfo } from '../../utils';
 import { generatePdf } from '../services/pdfService';
 
 type TenderWorkspaceProps = {
@@ -32,6 +32,11 @@ type WorkspaceView = 'overview' | 'risk' | 'tasks' | 'quotation' | 'technical' |
 
 const TenderWorkspace: React.FC<TenderWorkspaceProps> = ({ selectedTender, store, onBack, currentUser }) => {
     const [activeView, setActiveView] = useState<WorkspaceView>('overview');
+
+    const tenderActivityLog = useMemo(() => {
+        // FIX: Get activityLog from the selectedTender prop, not from the store.
+        return selectedTender.activityLog || [];
+    }, [selectedTender.activityLog]);
 
     const navGroups = [
         {
@@ -66,7 +71,7 @@ const TenderWorkspace: React.FC<TenderWorkspaceProps> = ({ selectedTender, store
         try {
             const docToSave = await generatePdf(DocumentType.TECHNICAL_OFFER, selectedTender, store.companyProfile, store.clients, store.documentSettings);
             if (docToSave) {
-                 store.addDocument(selectedTender.tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
+                 store.addDocument(selectedTender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
                  store.addToast(`${docToSave.name} generated and saved to Documents.`, 'success');
             }
         } catch (error) {
@@ -80,7 +85,7 @@ const TenderWorkspace: React.FC<TenderWorkspaceProps> = ({ selectedTender, store
             case 'overview':
                 return <OverviewSection tender={selectedTender} store={store} currentUser={currentUser} />;
             case 'activity':
-                return <ActivitySection activityLog={selectedTender.activityLog || []} />;
+                return <ActivitySection activityLog={tenderActivityLog} />;
             case 'collaboration':
                 return <CollaborationSection tender={selectedTender} store={store} currentUser={currentUser} />;
             case 'tasks':
@@ -92,7 +97,7 @@ const TenderWorkspace: React.FC<TenderWorkspaceProps> = ({ selectedTender, store
             case 'technical':
                 return <TechnicalOfferSection tender={selectedTender} store={store} onGeneratePdf={handleGenerateTechnicalPdf} />;
             case 'documents':
-                return <DocumentManager tenderId={selectedTender.tender.id} store={store} tender={selectedTender} currentUser={currentUser} />;
+                return <DocumentManager tenderId={selectedTender.id} store={store} tender={selectedTender} currentUser={currentUser} />;
             case 'procurement':
                 return <ProcurementSection tender={selectedTender} store={store} />;
             case 'logistics':

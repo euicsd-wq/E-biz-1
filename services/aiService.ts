@@ -2,8 +2,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AIProvider, type AIConfig, type Tender, type RiskAssessment, type ManagedDocument, type DocumentAnalysis, type TechnicalDetails, AIExtractedItem, AIInsights } from '../types';
 import { CORS_PROXY_URL, DEFAULT_TECH_SPEC_FIELDS } from '../constants';
 
-// --- HELPER FUNCTIONS ---
-
 const stripHtml = (html: string): string => {
     try {
         const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -24,10 +22,7 @@ const handleApiError = (provider: AIProvider, error: any): never => {
     throw new Error(`Failed to get a response from ${provider} due to an API error: ${errorMessage}`);
 };
 
-
-// --- PROVIDER-SPECIFIC API CALLERS ---
-
-async function callGemini(prompt: any, config: AIConfig, schema?: any): Promise<string> {
+async function callGemini(prompt: { parts: any[] }, config: AIConfig, schema?: any): Promise<string> {
     const ai = new GoogleGenAI({ apiKey: config.apiKey });
     const model = config.model || 'gemini-2.5-flash';
 
@@ -38,15 +33,13 @@ async function callGemini(prompt: any, config: AIConfig, schema?: any): Promise<
             generationConfig.responseSchema = schema;
         }
 
-        // The 'tools' property is specific to Gemini for features like Google Search grounding.
-        // It's added here conditionally.
-        if (prompt.tools) {
-            generationConfig.tools = prompt.tools;
+        if ((prompt.parts[0] as any).tools) {
+            generationConfig.tools = (prompt.parts[0] as any).tools;
         }
 
         const response = await ai.models.generateContent({
             model,
-            contents: prompt,
+            contents: { parts: prompt.parts },
             config: generationConfig,
         });
         
@@ -119,13 +112,14 @@ async function callAnthropic(prompt: any, config: AIConfig, schema: any | undefi
 }
 
 
-// --- CENTRAL DISPATCHER ---
-
 async function generateContent(prompt: string | { parts: any[], tools?: any[] }, config: AIConfig, schema?: any): Promise<string> {
-    if (!config.apiKey) throw new Error(`API key for ${config.provider} is not configured. Please add it in Settings.`);
-    if (!config.model) throw new Error(`Model for ${config.provider} is not configured. Please select one in Settings.`);
+    if (!config.apiKey) {
+        throw new Error(`API key for ${config.provider} is not configured. Please add it in Settings.`);
+    }
+    if (!config.model) {
+        throw new Error(`Model for ${config.provider} is not configured. Please select one in Settings.`);
+    }
 
-    // Normalize prompt to the object structure for simplicity
     const promptObject = typeof prompt === 'string' ? { parts: [{ text: prompt }] } : prompt;
 
     switch (config.provider) {
@@ -142,8 +136,6 @@ async function generateContent(prompt: string | { parts: any[], tools?: any[] },
     }
 }
 
-
-// --- EXPORTED BUSINESS LOGIC FUNCTIONS ---
 
 const tenderDetailsSchema = {
     type: Type.OBJECT,
@@ -209,7 +201,7 @@ Extract the following information:
         title: data.title,
         summary: data.summary,
         closingDate: data.closingDate,
-        link: '', // No link from a document
+        link: '',
     };
 };
 
@@ -246,7 +238,6 @@ Title: ${tender.title}
 Summary: ${tender.summary}`;
 
     const category = await generateContent(prompt, config);
-    // Clean up response to ensure it's just the category
     return category.replace(/["\n.]/g, '').trim();
 };
 
@@ -277,7 +268,7 @@ Summary: ${tender.summary}`;
         return JSON.parse(jsonText) as AIInsights;
     } catch (e) {
         console.error("Failed to extract tender insights:", e);
-        return { keywords: [] }; // Return empty object on failure
+        return { keywords: [] };
     }
 };
 
@@ -297,7 +288,6 @@ export const assessTenderRisk = async (tender: Tender, quoteValue: number, confi
         Provide an overall risk level (Low, Medium, or High), list 3-5 key risks, suggest a mitigation strategy for each, and give a confidence score for your analysis.
     `;
     
-    // Schema is defined for Gemini's structured output. Other models use it as a signal.
     const riskSchema = {
         type: Type.OBJECT,
         properties: {
@@ -356,9 +346,7 @@ export const fillTechnicalSpecs = async (manufacturer: string, model: string, co
     const specSchemaProperties: { [key: string]: { type: Type.STRING } } = {};
     DEFAULT_TECH_SPEC_FIELDS.forEach(field => { specSchemaProperties[field.id] = { type: Type.STRING }; });
     const specSchema = { type: Type.OBJECT, properties: specSchemaProperties };
-
-    // Note: Google Search grounding is a Gemini-specific feature.
-    // We'll only add the 'tools' parameter for Gemini. Other models will use their training data.
+    
     const prompt: any = { parts: [{ text: promptText }] };
     if (config.provider === AIProvider.GEMINI) {
         prompt.tools = [{ googleSearch: {} }];

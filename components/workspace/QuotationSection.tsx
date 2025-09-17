@@ -44,7 +44,7 @@ const QuotationSection: React.FC<QuotationSectionProps> = ({ tender, store }) =>
         try {
             const docToSave = await generatePdf(type, tender, companyProfile, clients, documentSettings);
             if (docToSave) {
-                 addDocument(tender.tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
+                 addDocument(tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
                  store.addToast(`${docToSave.name} generated and saved to Documents.`, 'success');
             }
         } catch (error) {
@@ -57,28 +57,30 @@ const QuotationSection: React.FC<QuotationSectionProps> = ({ tender, store }) =>
     useEffect(() => {
         if (!financialDetails.quoteNumber) {
             const suggestedQuoteNumber = `QUO-${tender.tender.id.slice(-4)}-${new Date().getFullYear()}`;
-            updateFinancialDetails(tender.tender.id, { quoteNumber: suggestedQuoteNumber });
+            updateFinancialDetails(tender.id, { quoteNumber: suggestedQuoteNumber });
         }
-    }, [financialDetails.quoteNumber, tender.tender.id, updateFinancialDetails]);
+    }, [financialDetails.quoteNumber, tender.id, tender.tender.id, updateFinancialDetails]);
     
     const handleDetailChange = (field: keyof FinancialDetails, value: string | number) => {
-        updateFinancialDetails(tender.tender.id, { [field]: value });
+        updateFinancialDetails(tender.id, { [field]: value });
     };
 
     const handleAddFromCatalog = (newQuoteItems: Omit<QuoteItem, "id">[]) => {
-        addMultipleQuoteItems(tender.tender.id, newQuoteItems);
+        addMultipleQuoteItems(tender.id, newQuoteItems);
         setIsCatalogPickerOpen(false);
     };
     
     const handleNewItem = () => {
         const newItem: Omit<QuoteItem, 'id'> = { itemName: '', description: '', quantity: 1, unitPrice: 0, cost: 0, itemType: 'Goods' };
-        addQuoteItem(tender.tender.id, newItem);
+        addQuoteItem(tender.id, newItem);
     };
 
-    const handleSaveNewClient = () => {
+    const handleSaveNewClient = async () => {
         if (manualClient.name) {
-            const newClient = addClient(manualClient);
-            assignTenderToClient(tender.tender.id, newClient.id);
+            const { data: newClient } = await addClient(manualClient);
+            if (newClient) {
+                assignTenderToClient(tender.id, newClient.id);
+            }
             setManualClient({ name: '', address: '', email: '', phone: '', contactPerson: '' }); // Clear form
         }
     };
@@ -124,7 +126,7 @@ const QuotationSection: React.FC<QuotationSectionProps> = ({ tender, store }) =>
                         <h4 className="font-medium text-slate-300 mb-2">BILL TO:</h4>
                         <select
                             value={financialDetails.clientId || ''}
-                            onChange={e => assignTenderToClient(tender.tender.id, e.target.value || null)}
+                            onChange={e => assignTenderToClient(tender.id, e.target.value || null)}
                             className="input-style mb-2"
                         >
                             <option value="">-- Select Existing Client or Add New --</option>
@@ -186,12 +188,12 @@ const QuotationSection: React.FC<QuotationSectionProps> = ({ tender, store }) =>
                         {quoteItems.length > 0 ? quoteItems.map((item, index) => (
                             <tr key={item.id}>
                                 <td className="p-2 text-slate-400">{index+1}</td>
-                                <td className="p-1"><input type="text" value={item.itemName} onChange={e => updateQuoteItem(tender.tender.id, item.id, {...item, itemName: e.target.value})} placeholder="Item Name" className="input-style !p-1.5 text-sm"/></td>
-                                <td className="p-1"><textarea value={item.description} onChange={e => updateQuoteItem(tender.tender.id, item.id, {...item, description: e.target.value})} placeholder="Item Description" className="input-style !p-1.5 text-sm min-h-[40px]"/></td>
-                                <td className="p-1"><input type="number" value={item.quantity} onChange={e => updateQuoteItem(tender.tender.id, item.id, {...item, quantity: Number(e.target.value)})} className="input-style !p-1.5 text-sm"/></td>
-                                <td className="p-1"><input type="number" value={item.unitPrice} onChange={e => updateQuoteItem(tender.tender.id, item.id, {...item, unitPrice: Number(e.target.value)})} className="input-style !p-1.5 text-sm"/></td>
+                                <td className="p-1"><input type="text" value={item.itemName} onChange={e => updateQuoteItem(tender.id, item.id, {...item, itemName: e.target.value})} placeholder="Item Name" className="input-style !p-1.5 text-sm"/></td>
+                                <td className="p-1"><textarea value={item.description} onChange={e => updateQuoteItem(tender.id, item.id, {...item, description: e.target.value})} placeholder="Item Description" className="input-style !p-1.5 text-sm min-h-[40px]"/></td>
+                                <td className="p-1"><input type="number" value={item.quantity} onChange={e => updateQuoteItem(tender.id, item.id, {...item, quantity: Number(e.target.value)})} className="input-style !p-1.5 text-sm"/></td>
+                                <td className="p-1"><input type="number" value={item.unitPrice} onChange={e => updateQuoteItem(tender.id, item.id, {...item, unitPrice: Number(e.target.value)})} className="input-style !p-1.5 text-sm"/></td>
                                 <td className="p-2 font-mono text-slate-300 text-sm">{formatCurrency(item.quantity * item.unitPrice)}</td>
-                                <td className="p-2 text-center"><button onClick={() => removeQuoteItem(tender.tender.id, item.id)} className="btn-icon-danger"><TrashIcon className="w-4 h-4"/></button></td>
+                                <td className="p-2 text-center"><button onClick={() => removeQuoteItem(tender.id, item.id)} className="btn-icon-danger"><TrashIcon className="w-4 h-4"/></button></td>
                             </tr>
                         )) : (
                             <tr><td colSpan={7} className="text-center p-8 text-slate-400">No items added to this quote yet.</td></tr>

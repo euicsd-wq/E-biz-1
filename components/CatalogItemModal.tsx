@@ -13,20 +13,20 @@ type CatalogItemModalProps = {
 };
 
 const emptyItem: Omit<CatalogItem, 'id'> = {
-    itemType: 'Goods',
+    item_type: 'Goods',
     category: '',
-    itemName: '',
+    item_name: '',
     description: '',
     manufacturer: '',
     model: '',
-    salePrice: 0,
+    sale_price: 0,
     cost: 0,
     uom: '',
-    vendorId: null,
-    assignedPersonId: null,
-    technicalSpecs: {},
+    vendor_id: null,
+    assigned_person_id: null,
+    technical_specs: {},
     documents: [],
-    hsnCode: '',
+    hsn_code: '',
 };
 
 const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, store, itemToEdit }) => {
@@ -38,21 +38,21 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
 
   useEffect(() => {
     if (isOpen) {
-      setItem(itemToEdit ? { ...itemToEdit } : { ...emptyItem, technicalSpecs: {}, documents: [] });
+      setItem(itemToEdit ? { ...itemToEdit } : { ...emptyItem, technical_specs: {}, documents: [] });
       setAiError(null);
       setIsAiLoading(false);
     }
   }, [isOpen, itemToEdit]);
 
-  const handleChange = (field: keyof Omit<CatalogItem, 'id' | 'technicalSpecs' | 'documents'>, value: string | number | null) => {
+  const handleChange = (field: keyof Omit<CatalogItem, 'id' | 'technical_specs' | 'documents'>, value: string | number | null) => {
     setItem(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSpecChange = (fieldId: string, value: string) => {
     setItem(prev => ({ 
         ...prev, 
-        technicalSpecs: {
-            ...prev.technicalSpecs,
+        technical_specs: {
+            ...prev.technical_specs,
             [fieldId]: value
         }
     }));
@@ -96,7 +96,7 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
         if(Object.keys(specs).length === 0) {
             setAiError('No data found, please add manually.');
         } else {
-            setItem(prev => ({ ...prev, technicalSpecs: { ...prev.technicalSpecs, ...specs } }));
+            setItem(prev => ({ ...prev, technical_specs: { ...prev.technical_specs, ...specs } }));
         }
     } catch (e: any) {
         setAiError(e.message);
@@ -109,7 +109,7 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
       const file = e.target.files?.[0];
       if (!file) return;
 
-      if (!item.itemName) {
+      if (!item.item_name) {
           setAiError('Please enter an item name first to help the AI find it in the document.');
           return;
       }
@@ -122,11 +122,11 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
           try {
               const base64Data = loadEvent.target?.result as string;
               const document = { fileData: base64Data, mimeType: file.type };
-              const specs = await fillTechnicalSpecsFromDocument(document, item.itemName, store.aiConfig);
+              const specs = await fillTechnicalSpecsFromDocument(document, item.item_name, store.aiConfig);
                if(Object.keys(specs).length === 0) {
                   setAiError('No matching specs found in the document.');
               } else {
-                  setItem(prev => ({ ...prev, technicalSpecs: { ...prev.technicalSpecs, ...specs } }));
+                  setItem(prev => ({ ...prev, technical_specs: { ...prev.technical_specs, ...specs } }));
               }
           } catch (err: any) {
               setAiError(err.message);
@@ -151,7 +151,7 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
 
   if (!isOpen) return null;
 
-  const specFields = item.itemType === 'Goods' ? DEFAULT_TECH_SPEC_FIELDS : DEFAULT_SERVICE_SPEC_FIELDS;
+  const specFields = item.item_type === 'Goods' ? DEFAULT_TECH_SPEC_FIELDS : DEFAULT_SERVICE_SPEC_FIELDS;
 
   return (
     <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
@@ -170,7 +170,7 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div>
                                 <label className="label-style">Item Type</label>
-                                <select value={item.itemType} onChange={e => { handleChange('itemType', e.target.value); if (e.target.value === 'Services') { handleChange('hsnCode', '') } }} className="input-style">
+                                <select value={item.item_type} onChange={e => { handleChange('item_type', e.target.value); if (e.target.value === 'Services') { handleChange('hsn_code', '') } }} className="input-style">
                                     <option value="Goods">Goods</option>
                                     <option value="Services">Services</option>
                                 </select>
@@ -181,7 +181,7 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
                             </div>
                             <div className="md:col-span-2">
                                 <label className="label-style">Item Name</label>
-                                <input type="text" value={item.itemName} onChange={e => handleChange('itemName', e.target.value)} required className="input-style"/>
+                                <input type="text" value={item.item_name} onChange={e => handleChange('item_name', e.target.value)} required className="input-style"/>
                             </div>
                             <div>
                                 <label className="label-style">Manufacturer</label>
@@ -202,16 +202,16 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
                                 </div>
                                 <div className="sm:col-span-1">
                                     <label className="label-style">Sale Price (USD)</label>
-                                    <input type="number" value={item.salePrice} onChange={e => handleChange('salePrice', Number(e.target.value))} min="0" step="0.01" className="input-style"/>
+                                    <input type="number" value={item.sale_price} onChange={e => handleChange('sale_price', Number(e.target.value))} min="0" step="0.01" className="input-style"/>
                                 </div>
                                  <div className="sm:col-span-1">
                                     <label className="label-style">UoM</label>
                                     <input type="text" value={item.uom || ''} onChange={e => handleChange('uom', e.target.value)} placeholder="e.g., Pcs" className="input-style"/>
                                 </div>
-                                {item.itemType === 'Goods' && (
+                                {item.item_type === 'Goods' && (
                                 <div className="sm:col-span-1">
                                     <label className="label-style">HSN Code</label>
-                                    <input type="text" value={item.hsnCode || ''} onChange={e => handleChange('hsnCode', e.target.value)} placeholder="e.g., 847130" className="input-style"/>
+                                    <input type="text" value={item.hsn_code || ''} onChange={e => handleChange('hsn_code', e.target.value)} placeholder="e.g., 847130" className="input-style"/>
                                 </div>
                                 )}
                             </div>
@@ -222,7 +222,7 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
                         <h3 className="text-lg font-semibold text-white mb-3 border-b border-slate-700 pb-2">Vendor Information</h3>
                         <div>
                             <label className="label-style">Vendor</label>
-                            <select value={item.vendorId ?? ''} onChange={e => handleChange('vendorId', e.target.value || null)} className="input-style">
+                            <select value={item.vendor_id ?? ''} onChange={e => handleChange('vendor_id', e.target.value || null)} className="input-style">
                                 <option value="">-- No Vendor --</option>
                                 {store.vendors.map(vendor => (
                                     <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
@@ -255,13 +255,13 @@ const CatalogItemModal: React.FC<CatalogItemModalProps> = ({ isOpen, onClose, st
                                     {field.type === 'text' ? (
                                         <input
                                             type="text"
-                                            value={item.technicalSpecs[field.id] || ''}
+                                            value={item.technical_specs[field.id] || ''}
                                             onChange={(e) => handleSpecChange(field.id, e.target.value)}
                                             className="input-style"
                                         />
                                     ) : (
                                         <textarea
-                                            value={item.technicalSpecs[field.id] || ''}
+                                            value={item.technical_specs[field.id] || ''}
                                             onChange={(e) => handleSpecChange(field.id, e.target.value)}
                                             className="input-style min-h-[80px]"
                                             rows={3}

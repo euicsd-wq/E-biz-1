@@ -44,8 +44,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ query, store, onNavigate, o
 
     // Search Catalog
     catalog.forEach((item: CatalogItem) => {
-        if (item.itemName.toLowerCase().includes(lowerQuery) || item.description.toLowerCase().includes(lowerQuery)) {
-            allResults.push({ type: 'catalog', id: item.id, title: item.itemName, subtitle: `Catalog • ${item.category}`, item });
+        if (item.item_name.toLowerCase().includes(lowerQuery) || item.description.toLowerCase().includes(lowerQuery)) {
+            allResults.push({ type: 'catalog', id: item.id, title: item.item_name, subtitle: `Catalog • ${item.category}`, item });
         }
     });
 

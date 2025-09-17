@@ -43,12 +43,15 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ activityLog }) => {
         return <p className="text-slate-400 text-center py-8">No activity recorded yet.</p>;
     }
 
+    // Sort by timestamp descending
+    const sortedLog = [...activityLog].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
     return (
         <div>
             <h2 className="text-xl font-semibold text-white mb-6">Activity Timeline</h2>
             <div className="relative border-l-2 border-slate-700 ml-4">
                 <ul className="space-y-6">
-                    {activityLog.map((log) => {
+                    {sortedLog.map((log) => {
                         const { icon: Icon, color } = iconMap[log.type] || { icon: InformationCircleIcon, color: 'text-slate-400' };
                         return (
                             <li key={log.id} className="pl-8 relative">

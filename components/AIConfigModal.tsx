@@ -40,7 +40,7 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, currentC
   
   const handleProviderChange = (provider: AIProvider) => {
     const defaultModel = modelsByProvider[provider][0]?.id || '';
-    setConfig(prev => ({ ...prev, provider, model: defaultModel, apiKey: '' })); // Reset API key on provider change for security
+    setConfig(prev => ({ ...prev, provider, model: defaultModel }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -53,7 +53,7 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, currentC
     return null;
   }
   
-  const providerName = config.provider.split(' ')[0]; // e.g., "Google", "OpenAI"
+  const providerName = config.provider.split(' ')[0];
 
   return (
     <div 
@@ -104,17 +104,16 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, currentC
               </select>
             </div>
             <div>
-              <label htmlFor="api-key" className="label-style">{providerName} API Key</label>
-              <input
-                id="api-key"
-                type="password"
-                value={config.apiKey}
-                onChange={e => setConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                className="input-style w-full"
-                placeholder={`Enter your ${providerName} API key`}
-                required
-              />
-               <p className="text-xs text-slate-500 mt-1">Your API key is stored locally in your browser and never sent to our servers.</p>
+                <label htmlFor="api-key" className="label-style">{providerName} API Key</label>
+                <input
+                  id="api-key"
+                  type="password"
+                  value={config.apiKey}
+                  onChange={e => setConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                  className="input-style w-full"
+                  placeholder={`Enter your ${providerName} API key`}
+                />
+                <p className="text-xs text-slate-500 mt-1">Your API key is stored securely in the database.</p>
             </div>
           </div>
           <div className="flex justify-end gap-3 p-4 bg-slate-800/80 border-t border-slate-700">

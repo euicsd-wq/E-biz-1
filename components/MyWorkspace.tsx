@@ -129,7 +129,7 @@ const MyTasksBoard: React.FC<{store: ReturnType<typeof useTenderStore>, currentU
 
 
 const MyWorkspace: React.FC<MyWorkspaceProps> = ({ store, currentUser, onSelectTender }) => {
-    const { watchlist, tasks, updateWatchlistStatus, removeFromWatchlist, updateTenderClosingDate } = store;
+    const { watchlist, tasks, updateWatchlistStatus, removeFromWatchlist, updateTenderClosingDate, assignTenderToMember } = store;
     const [activeTab, setActiveTab] = useState<WorkspaceTab>('overview');
 
     const myTenders = useMemo(() => 
@@ -181,7 +181,7 @@ const MyWorkspace: React.FC<MyWorkspaceProps> = ({ store, currentUser, onSelectT
                                     <div className="divide-y divide-slate-700">
                                         {myTenders.map(item => (
                                             <WatchlistItemRow 
-                                                key={item.tender.id}
+                                                key={item.id}
                                                 item={item}
                                                 onStatusChange={updateWatchlistStatus}
                                                 onRemove={removeFromWatchlist}
@@ -189,6 +189,7 @@ const MyWorkspace: React.FC<MyWorkspaceProps> = ({ store, currentUser, onSelectT
                                                 onSelectTender={onSelectTender}
                                                 teamMembers={store.teamMembers}
                                                 currentUser={currentUser}
+                                                assignTenderToMember={assignTenderToMember}
                                             />
                                         ))}
                                     </div>

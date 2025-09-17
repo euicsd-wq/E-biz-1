@@ -3,7 +3,7 @@ import type { useTenderStore } from '../hooks/useTenderStore';
 import type { WatchlistItem, TeamMember } from '../types';
 import { TenderStatus, TeamMemberRole } from '../types';
 import { ClipboardListIcon, PlusIcon, ArrowDownTrayIcon, ListViewIcon, ViewColumnsIcon, TrashIcon } from './icons';
-import AddTenderModal from './AddTenderModal';
+import { AddTenderModal } from './AddTenderModal';
 import { WatchlistItemRow } from './WatchlistItemRow';
 import { exportToCsv, calculateRemainingDays, getRemainingDaysInfo, getStatusColors, getInitials, generateHslColorFromString } from '../utils';
 
@@ -20,13 +20,13 @@ const TenderKanbanCard: React.FC<{
     item: WatchlistItem; 
     assignedMember: TeamMember | undefined;
     onSelectTender: (item: WatchlistItem) => void; 
-    onRemove: (tenderId: string) => void;
+    onRemove: (itemId: string) => void;
 }> = ({ item, assignedMember, onSelectTender, onRemove }) => {
     const remainingDays = calculateRemainingDays(item.tender.closingDate);
     const { text, textColor } = getRemainingDaysInfo(remainingDays);
 
     const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-        e.dataTransfer.setData('tenderId', item.tender.id);
+        e.dataTransfer.setData('watchlistId', item.id);
     };
 
     return (
@@ -38,10 +38,9 @@ const TenderKanbanCard: React.FC<{
         >
             <button 
                 onClick={(e) => {
-                    // This is critical to prevent the main card's onClick from firing, which would open the workspace.
                     e.stopPropagation();
                     if (window.confirm('Are you sure you want to delete this tender?')) {
-                        onRemove(item.tender.id);
+                        onRemove(item.id);
                     }
                 }}
                 className="absolute top-1 right-1 p-1.5 rounded-full text-slate-500 hover:text-red-400 hover:bg-red-900/50 opacity-0 group-hover:opacity-100 transition-opacity z-10"
@@ -75,9 +74,9 @@ const KanbanColumn: React.FC<{
     status: TenderStatus;
     tenders: WatchlistItem[];
     teamMemberMap: Record<string, TeamMember>;
-    onDrop: (tenderId: string, status: TenderStatus) => void;
+    onDrop: (watchlistId: string, status: TenderStatus) => void;
     onSelectTender: (item: WatchlistItem) => void;
-    onRemove: (tenderId: string) => void;
+    onRemove: (itemId: string) => void;
 }> = ({ status, tenders, teamMemberMap, onDrop, onSelectTender, onRemove }) => {
     const [isOver, setIsOver] = useState(false);
     const { bg, text } = getStatusColors(status);
@@ -91,9 +90,9 @@ const KanbanColumn: React.FC<{
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsOver(false);
-        const tenderId = e.dataTransfer.getData('tenderId');
-        if (tenderId) {
-            onDrop(tenderId, status);
+        const watchlistId = e.dataTransfer.getData('watchlistId');
+        if (watchlistId) {
+            onDrop(watchlistId, status);
         }
     };
 
@@ -110,7 +109,7 @@ const KanbanColumn: React.FC<{
             <div className="p-3 space-y-3 overflow-y-auto flex-grow">
                 {tenders.map(item => {
                      const assignedMember = item.assignedTeamMemberId ? teamMemberMap[item.assignedTeamMemberId] : undefined;
-                    return <TenderKanbanCard key={item.tender.id} item={item} assignedMember={assignedMember} onSelectTender={onSelectTender} onRemove={onRemove} />
+                    return <TenderKanbanCard key={item.id} item={item} assignedMember={assignedMember} onSelectTender={onSelectTender} onRemove={onRemove} />
                 })}
             </div>
         </div>
@@ -118,7 +117,7 @@ const KanbanColumn: React.FC<{
 };
 
 const TendersHub: React.FC<TendersHubProps> = ({ store, onSelectTender, currentUser }) => {
-  const { watchlist, updateWatchlistStatus, removeFromWatchlist, updateTenderClosingDate, teamMembers } = store;
+  const { watchlist, updateWatchlistStatus, removeFromWatchlist, updateTenderClosingDate, teamMembers, assignTenderToMember } = store;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [assignedToFilter, setAssignedToFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
@@ -194,8 +193,8 @@ const TendersHub: React.FC<TendersHubProps> = ({ store, onSelectTender, currentU
       { id: 'all', label: 'All' },
   ];
 
-  const handleDrop = (tenderId: string, newStatus: TenderStatus) => {
-      updateWatchlistStatus(tenderId, newStatus);
+  const handleDrop = (watchlistId: string, newStatus: TenderStatus) => {
+      updateWatchlistStatus(watchlistId, newStatus);
   };
 
   return (
@@ -268,7 +267,7 @@ const TendersHub: React.FC<TendersHubProps> = ({ store, onSelectTender, currentU
             <div className="divide-y divide-slate-700">
                 {filteredTenders.map(item => (
                     <WatchlistItemRow 
-                        key={item.tender.id}
+                        key={item.id}
                         item={item}
                         onStatusChange={updateWatchlistStatus}
                         onRemove={removeFromWatchlist}
@@ -276,6 +275,7 @@ const TendersHub: React.FC<TendersHubProps> = ({ store, onSelectTender, currentU
                         onSelectTender={onSelectTender}
                         teamMembers={teamMembers}
                         currentUser={currentUser}
+                        assignTenderToMember={assignTenderToMember}
                     />
                 ))}
             </div>

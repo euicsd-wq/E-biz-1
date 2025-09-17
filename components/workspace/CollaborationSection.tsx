@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import type { useTenderStore } from '../../hooks/useTenderStore';
-import type { WatchlistItem, TeamMember } from '../../types';
+import type { WatchlistItem, TeamMember, Comment } from '../../types';
 import { getInitials, generateHslColorFromString, formatTimeAgo } from '../../utils';
 
 type CollaborationSectionProps = { 
@@ -10,6 +10,7 @@ type CollaborationSectionProps = {
 };
 
 const CollaborationSection: React.FC<CollaborationSectionProps> = ({ tender, store, currentUser }) => {
+    // FIX: 'comments' is not a global state; it's part of the 'tender' (WatchlistItem) prop.
     const { teamMembers, addComment } = store;
     const [newComment, setNewComment] = useState('');
     const [mentionSearch, setMentionSearch] = useState('');
@@ -22,9 +23,15 @@ const CollaborationSection: React.FC<CollaborationSectionProps> = ({ tender, sto
         return acc;
     }, {} as Record<string, TeamMember>), [teamMembers]);
 
+    // FIX: Get comments from the 'tender' prop directly.
+    const tenderComments = useMemo(() => {
+        return (tender.comments || [])
+            .sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }, [tender.comments]);
+
     useEffect(() => {
         commentEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [tender.comments]);
+    }, [tenderComments]);
 
     const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const text = e.target.value;
@@ -55,6 +62,7 @@ const CollaborationSection: React.FC<CollaborationSectionProps> = ({ tender, sto
             .filter(m => mentions.some(mention => m.name.toLowerCase() === mention.toLowerCase()))
             .map(m => m.id);
 
+        // FIX: Call addComment with separate arguments as defined in the store hook.
         addComment(tender.tender.id, currentUser.id, newComment.trim(), mentionedIds);
         setNewComment('');
     };
@@ -67,7 +75,7 @@ const CollaborationSection: React.FC<CollaborationSectionProps> = ({ tender, sto
         <div className="flex flex-col h-full max-h-[70vh]">
             <h2 className="text-xl font-semibold text-white mb-4 flex-shrink-0">Collaboration</h2>
             <div className="flex-grow overflow-y-auto pr-4 -mr-4 space-y-4">
-                {(tender.comments || []).map(comment => {
+                {tenderComments.map(comment => {
                     const author = teamMemberMap[comment.authorId];
                     const isCurrentUser = author?.id === currentUser.id;
                     return (

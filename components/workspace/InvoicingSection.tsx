@@ -38,7 +38,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ tender, store }) =>
         try {
             const docToSave = await generatePdf(DocumentType.COMMERCIAL_INVOICE, singleInvoiceTender, companyProfile, clients, documentSettings);
              if (docToSave) {
-                 addDocument(tender.tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
+                 addDocument(tender.id, docToSave, DocumentCategory.GENERATED, 'System', true);
                  store.addToast(`${docToSave.name} generated and saved to Documents.`, 'success');
             }
         } catch (error) {
@@ -52,7 +52,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ tender, store }) =>
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-white">Invoices</h2>
                 <div className="flex gap-2">
-                    <button onClick={() => createInvoiceFromQuote(tender.tender.id)} className="btn-secondary text-sm">Create from Quote</button>
+                    <button onClick={() => createInvoiceFromQuote(tender.id)} className="btn-secondary text-sm">Create from Quote</button>
                     <button onClick={() => { setEditingInvoice(null); setIsInvoiceModalOpen(true); }} className="btn-primary text-sm"><PlusIcon className="w-4 h-4 mr-2"/>New Invoice</button>
                 </div>
             </div>
@@ -76,7 +76,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ tender, store }) =>
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => handlePrintInvoice(invoice)} className="btn-icon" title="Print Invoice"><DocumentDownloadIcon className="w-5 h-5"/></button>
                                     <button onClick={() => { setEditingInvoice(invoice); setIsInvoiceModalOpen(true); }} className="btn-icon" title="Edit Invoice"><EditIcon className="w-5 h-5"/></button>
-                                    <button onClick={() => removeInvoice(tender.tender.id, invoice.id)} className="btn-icon-danger" title="Delete Invoice"><TrashIcon className="w-5 h-5"/></button>
+                                    <button onClick={() => removeInvoice(tender.id, invoice.id)} className="btn-icon-danger" title="Delete Invoice"><TrashIcon className="w-5 h-5"/></button>
                                 </div>
                             </div>
                         </div>
@@ -86,7 +86,7 @@ const InvoicingSection: React.FC<InvoicingSectionProps> = ({ tender, store }) =>
                 <p className="text-center text-slate-400 py-8">No invoices created for this tender yet.</p>
             )}
             
-            <InvoiceModal isOpen={isInvoiceModalOpen} onClose={() => setIsInvoiceModalOpen(false)} store={store} tenderId={tender.tender.id} invoiceToEdit={editingInvoice} />
+            <InvoiceModal isOpen={isInvoiceModalOpen} onClose={() => setIsInvoiceModalOpen(false)} store={store} tenderId={tender.id} invoiceToEdit={editingInvoice} />
         </div>
     );
 };

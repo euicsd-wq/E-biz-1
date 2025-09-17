@@ -1,10 +1,28 @@
-import type { Source } from './types';
+import type { Source, View } from './types';
+import { TeamMemberRole } from './types';
 
 export const DEFAULT_SOURCES: Source[] = [
   { id: 'sudanbid-json', url: 'https://rss.app/feeds/v1.1/5hvMa0JIXJnG0baI.json' },
 ];
 
 export const CORS_PROXY_URL = 'https://corsproxy.io/?';
+
+export const ALL_PERMISSIONS: { id: View; label: string }[] = [
+    { id: 'home', label: 'Home Dashboard' },
+    { id: 'operations-hub', label: 'Operations Hub' },
+    { id: 'crm-hub', label: 'CRM Hub' },
+    { id: 'finance-hub', label: 'Finance Hub' },
+    { id: 'reporting-hub', label: 'Reporting Hub' },
+    { id: 'mail', label: 'Mail Client' },
+    { id: 'settings', label: 'Settings' },
+];
+
+export const ROLE_PERMISSIONS: Record<TeamMemberRole, View[]> = {
+    [TeamMemberRole.ADMIN]: ['home', 'operations-hub', 'crm-hub', 'finance-hub', 'reporting-hub', 'settings', 'mail'],
+    [TeamMemberRole.MANAGER]: ['home', 'operations-hub', 'crm-hub', 'finance-hub', 'reporting-hub', 'settings', 'mail'],
+    [TeamMemberRole.MEMBER]: ['home', 'operations-hub', 'crm-hub', 'settings', 'mail'],
+};
+
 
 export const DEFAULT_TECH_SPEC_FIELDS: { id: string; label: string; type: 'text' | 'textarea' }[] = [
   { id: 'manufacturerName', label: 'I. Manufacturer Name', type: 'text' },

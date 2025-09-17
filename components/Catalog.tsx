@@ -89,15 +89,15 @@ const Catalog: React.FC<CatalogProps> = ({ store, currentUser }) => {
                         <tbody className="divide-y divide-slate-700">
                             {catalog.map(item => (
                                 <tr key={item.id} className="hover:bg-slate-800 transition-colors">
-                                    <td className="p-3 font-medium text-slate-100">{item.itemName}</td>
-                                    <td className="p-3 text-slate-400">{item.itemType}</td>
+                                    <td className="p-3 font-medium text-slate-100">{item.item_name}</td>
+                                    <td className="p-3 text-slate-400">{item.item_type}</td>
                                     <td className="p-3 text-slate-400">{item.category}</td>
                                     <td className="p-3 text-slate-400">{formatCurrency(item.cost)}</td>
-                                    <td className="p-3 text-slate-400">{formatCurrency(item.salePrice)}</td>
+                                    <td className="p-3 text-slate-400">{formatCurrency(item.sale_price)}</td>
                                     <td className="p-3 text-slate-400">
-                                        {item.salePrice > 0 ? `${(((item.salePrice - item.cost) / item.salePrice) * 100).toFixed(1)}%` : 'N/A'}
+                                        {item.sale_price > 0 ? `${(((item.sale_price - item.cost) / item.sale_price) * 100).toFixed(1)}%` : 'N/A'}
                                     </td>
-                                    <td className="p-3 text-slate-400">{item.vendorId ? vendorMap[item.vendorId] || 'N/A' : 'N/A'}</td>
+                                    <td className="p-3 text-slate-400">{item.vendor_id ? vendorMap[item.vendor_id] || 'N/A' : 'N/A'}</td>
                                     {canEdit && (
                                         <td className="p-3 text-right">
                                             <div className="flex justify-end gap-2">
